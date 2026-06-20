@@ -113,7 +113,7 @@ S7LOVESY.get('/create-link', (req, res) => {
 
             res.json({
                 success: true,
-                url: `https://instagram-123.onrender.com/${LovesNameSY}`
+                url: `https://instagram-321.onrender.com/${LovesNameSY}`
             });
 
         } catch (writeErr) {
